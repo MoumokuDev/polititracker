@@ -36,7 +36,7 @@
 {% block content %}
 <div class="head">
   {% if portrait %}
-  <img src="/static/portraits/{{ figure.bioguide_id }}.jpg"
+  <img src="/static/portraits/{{ figure.slug }}.jpg"
        alt="Official portrait of {{ figure.full_name }}">
   {% else %}
   <div class="mono">{{ initials }}</div>
@@ -66,9 +66,30 @@
   <div class="tile"><div class="n">{{ stats.votes_total }}</div><div class="l">Roll-call votes recorded</div></div>
   <div class="tile"><div class="n">{{ stats.yea }}</div><div class="l">Voted Yea / Aye</div></div>
   <div class="tile"><div class="n">{{ stats.nay }}</div><div class="l">Voted Nay / No</div></div>
-  <div class="tile"><div class="n">{{ stats.not_voting }}</div><div class="l">Not voting</div></div>
+  <div class="tile"><div class="n">{{ stats.not_voting }}{% if stats.missed_pct is not none %} <span style="font-size: .85rem">({{ stats.missed_pct }}%)</span>{% endif %}</div><div class="l">Votes missed</div></div>
   <div class="tile"><div class="n">{{ stats.statements }}</div><div class="l">Statements on record</div></div>
+  {% if stats.sponsored %}
+  <div class="tile"><div class="n">{{ stats.sponsored }}</div><div class="l">Bills &amp; resolutions introduced</div></div>
+  <div class="tile"><div class="n">{{ stats.became_law }}</div><div class="l">Of those, became law</div></div>
+  <div class="tile"><div class="n">{{ stats.cosponsored }}</div><div class="l">Cosponsored</div></div>
+  {% endif %}
 </div>
+
+{% if committees %}
+<h2>Committee assignments</h2>
+<div class="votes">
+  {% for m, c in committees %}
+  <div class="vote-row">
+    <span class="vote-q">{% if c.url %}<a href="{{ c.url }}" rel="noopener">{{ c.name }}</a>{% else %}{{ c.name }}{% endif %}</span>
+    {% if m.role_title %}<span class="badge">{{ m.role_title }}</span>{% endif %}
+    {% if m.rank %}<span class="vote-date">rank {{ m.rank }} ({{ m.party_side }})</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+<p class="roles-list" style="margin-top: .5rem">Current assignments per
+unitedstates/congress-legislators. Committee jurisdiction is useful context when
+reading the votes, disclosures, and contribution sources on this page.</p>
+{% endif %}
 
 <div class="coverage">
   These figures reflect only what this instance has ingested:

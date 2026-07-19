@@ -1,7 +1,7 @@
 {% macro card_html(card) %}
 <a class="fig-card" href="/figures/{{ card.figure.slug }}">
   {% if card.portrait %}
-  <img class="portrait" src="/static/portraits/{{ card.figure.bioguide_id }}.jpg"
+  <img class="portrait" src="/static/portraits/{{ card.figure.slug }}.jpg"
        alt="Official portrait of {{ card.figure.full_name }}">
   {% else %}
   <div class="mono" aria-label="No portrait on file">{{ card.initials }}</div>

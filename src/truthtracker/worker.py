@@ -91,6 +91,18 @@ def disclosures_weekly() -> None:
     _job(lambda s: house_disclosures.run(s, [date.today().year, date.today().year - 1]))
 
 
+def committees_weekly() -> None:
+    from truthtracker.ingestion.adapters import committees
+
+    _job(committees.run)
+
+
+def sponsorship_weekly() -> None:
+    from truthtracker.ingestion.adapters import member_sponsorship
+
+    _job(lambda s: member_sponsorship.run(s))
+
+
 def main() -> None:
     scheduler = BlockingScheduler(timezone="UTC")
     scheduler.add_job(crec_daily, "cron", hour=12, minute=15)
@@ -103,6 +115,8 @@ def main() -> None:
     scheduler.add_job(scotus_daily, "cron", hour=14, minute=30)
     scheduler.add_job(fedreg_daily, "cron", hour=14, minute=45)
     scheduler.add_job(disclosures_weekly, "cron", day_of_week="sat", hour=14, minute=0)
+    scheduler.add_job(committees_weekly, "cron", day_of_week="tue", hour=14, minute=0)
+    scheduler.add_job(sponsorship_weekly, "cron", day_of_week="wed", hour=13, minute=30)
     log.info(
         "worker scheduler starting (crec 12:15Z, votes 12:45Z, bills 13:15Z, "
         "index 13:45Z, scotus 14:30Z, fedreg 14:45Z, portraits Mon 14:15Z, "

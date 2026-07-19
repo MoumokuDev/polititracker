@@ -29,11 +29,20 @@ class RateLimitedClient:
     ) -> httpx.Response:
         """GET with pacing and 429 retry. Use params_list for repeated keys (fields[])."""
         merged = list({**self._base, **params}.items()) + list(params_list or [])
-        for _attempt in range(4):
+        last_exc: Exception | None = None
+        for attempt in range(4):
             wait = self._min_interval - (time.monotonic() - self._last)
             if wait > 0:
                 time.sleep(wait)
-            resp = self._client.get(url, params=merged)
+            try:
+                resp = self._client.get(url, params=merged)
+            except httpx.TransportError as exc:
+                # transient network drops (connection reset, incomplete reads):
+                # back off briefly and retry rather than killing a long ingest
+                last_exc = exc
+                self._last = time.monotonic()
+                time.sleep(5 * (attempt + 1))
+                continue
             self._last = time.monotonic()
             self.request_count += 1
             if resp.status_code == 429:
@@ -42,7 +51,7 @@ class RateLimitedClient:
                 continue
             resp.raise_for_status()
             return resp
-        raise RuntimeError(f"still rate-limited after retries: {url}")
+        raise RuntimeError(f"request failed after retries: {url}") from last_exc
 
 
 def data_gov_client(min_interval: float = 0.75) -> RateLimitedClient:

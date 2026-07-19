@@ -86,6 +86,13 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("tag-topics", help="Recompute machine topic tags for statements")
     p.add_argument("--threshold", type=float, default=None)
 
+    sub.add_parser("ingest-committees", help="Committee assignments (congress-legislators)")
+
+    p = sub.add_parser(
+        "ingest-sponsorship", help="Sponsored/cosponsored legislation per member"
+    )
+    p.add_argument("--limit-members", type=int, default=None)
+
     args = parser.parse_args(argv)
 
     if args.command == "seed-figures":
@@ -126,6 +133,14 @@ def main(argv: list[str] | None = None) -> int:
         from truthtracker.search import topics
 
         return _run(lambda s: topics.run(s, args.threshold))
+    if args.command == "ingest-committees":
+        from truthtracker.ingestion.adapters import committees
+
+        return _run(committees.run)
+    if args.command == "ingest-sponsorship":
+        from truthtracker.ingestion.adapters import member_sponsorship
+
+        return _run(lambda s: member_sponsorship.run(s, args.limit_members))
     return 2
 
 

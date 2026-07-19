@@ -4,6 +4,7 @@ from truthtracker.models.accountability import (
     AccountabilityRecord,
 )
 from truthtracker.models.base import Base
+from truthtracker.models.committee import Committee, CommitteeMembership
 from truthtracker.models.disclosure import FILING_TYPE_LABELS, DisclosureFiling
 from truthtracker.models.entity import ExternalId, Figure, FigureRole
 from truthtracker.models.finance import FinanceSource, FinanceSummary
@@ -22,6 +23,8 @@ __all__ = [
     "AccountabilityRecord",
     "Base",
     "Bill",
+    "Committee",
+    "CommitteeMembership",
     "DisclosureFiling",
     "FILING_TYPE_LABELS",
     "RECORD_TYPE_LABELS",

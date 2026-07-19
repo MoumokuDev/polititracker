@@ -24,6 +24,9 @@ from truthtracker.models import (
     RECORD_TYPE_LABELS,
     AccountabilityRecord,
     Bill,
+    BillSponsorship,
+    Committee,
+    CommitteeMembership,
     DisclosureFiling,
     Figure,
     FinanceSource,
@@ -31,6 +34,7 @@ from truthtracker.models import (
     IngestionRun,
     Promise,
     RollCall,
+    SourcePackage,
     Statement,
     StatementTopic,
     Topic,
@@ -188,7 +192,7 @@ def _initials(figure: Figure) -> str:
 def _card(figure: Figure, subtitle: str, portraits: set[str]) -> dict:
     return {
         "figure": figure,
-        "portrait": bool(figure.bioguide_id) and figure.bioguide_id in portraits,
+        "portrait": figure.slug in portraits,
         "initials": _initials(figure),
         "subtitle": subtitle,
     }
@@ -406,21 +410,71 @@ async def figure_page(
     coverage = await coverage_summary(session, figure_slug=slug)
     portraits = available_portraits()
 
+    committees = (
+        await session.execute(
+            select(CommitteeMembership, Committee)
+            .join(Committee, Committee.id == CommitteeMembership.committee_id)
+            .where(CommitteeMembership.figure_id == figure.id)
+            .order_by(Committee.name)
+        )
+    ).all()
+    sponsored_total = (
+        await session.execute(
+            select(func.count(BillSponsorship.id)).where(
+                BillSponsorship.figure_id == figure.id,
+                BillSponsorship.is_original.is_(True),
+            )
+        )
+    ).scalar_one()
+    became_law = (
+        await session.execute(
+            select(func.count(BillSponsorship.id))
+            .join(Bill, Bill.id == BillSponsorship.bill_id)
+            .where(
+                BillSponsorship.figure_id == figure.id,
+                BillSponsorship.is_original.is_(True),
+                Bill.latest_action_text.ilike("%became public law%"),
+            )
+        )
+    ).scalar_one()
+    cosponsored_total = (
+        await session.execute(
+            select(func.count(BillSponsorship.id)).where(
+                BillSponsorship.figure_id == figure.id,
+                BillSponsorship.is_original.is_(False),
+            )
+        )
+    ).scalar_one()
+
     return templates.TemplateResponse(
         request,
         "figure.html",
         {
             "figure": figure,
             "current_role": _current_role(figure),
-            "portrait": bool(figure.bioguide_id) and figure.bioguide_id in portraits,
+            "portrait": figure.slug in portraits,
             "initials": _initials(figure),
             "stats": {
                 "votes_total": sum(position_counts.values()),
                 "yea": position_counts.get("yea", 0),
                 "nay": position_counts.get("nay", 0),
                 "not_voting": position_counts.get("not_voting", 0),
+                "missed_pct": (
+                    round(
+                        100.0
+                        * position_counts.get("not_voting", 0)
+                        / sum(position_counts.values()),
+                        1,
+                    )
+                    if position_counts
+                    else None
+                ),
                 "statements": statement_total,
+                "sponsored": sponsored_total,
+                "became_law": became_law,
+                "cosponsored": cosponsored_total,
             },
+            "committees": committees,
             "timeline": timeline,
             "finance": finance,
             "finance_sources": finance_sources,
@@ -510,6 +564,44 @@ async def figure_topic_page(
             },
             "labels": SOURCE_TYPE_LABELS,
             "timeline_badges": TIMELINE_STATEMENT_BADGES,
+        },
+    )
+
+
+@app.get("/coverage", include_in_schema=False)
+async def coverage_page(
+    request: Request, session: AsyncSession = Depends(get_async_session)
+):
+    coverage = await coverage_summary(session)
+    runs = (
+        await session.scalars(
+            select(IngestionRun).order_by(IngestionRun.started_at.desc()).limit(25)
+        )
+    ).all()
+    failed_packages = (
+        await session.scalars(
+            select(SourcePackage)
+            .where(SourcePackage.status == "failed")
+            .order_by(SourcePackage.issue_date.desc())
+            .limit(50)
+        )
+    ).all()
+    last_success = (
+        await session.execute(
+            select(IngestionRun.adapter, func.max(IngestionRun.finished_at))
+            .where(IngestionRun.status == "success")
+            .group_by(IngestionRun.adapter)
+            .order_by(IngestionRun.adapter)
+        )
+    ).all()
+    return templates.TemplateResponse(
+        request,
+        "coverage.html",
+        {
+            "coverage": coverage,
+            "runs": runs,
+            "failed_packages": failed_packages,
+            "last_success": last_success,
         },
     )
 
