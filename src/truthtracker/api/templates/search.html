@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}TruthTracker — Claim Search{% endblock %}
+{% block style %}
+  form.search { display: grid; gap: .6rem; grid-template-columns: 1fr;
+                background: var(--card); border: 1px solid var(--line);
+                padding: 1rem; border-radius: 6px; }
+  input[type=text] { font: inherit; padding: .55rem .7rem; border: 1px solid var(--line);
+                     border-radius: 4px; width: 100%; }
+  .row { display: flex; gap: .6rem; flex-wrap: wrap; }
+  select, input[type=date] { font: inherit; font-size: .9rem; padding: .4rem;
+                             border: 1px solid var(--line); border-radius: 4px; }
+  button { font: inherit; padding: .5rem 1.2rem; background: var(--accent); color: #fff;
+           border: 0; border-radius: 4px; cursor: pointer; }
+  .nomatch { background: var(--warn-bg); border: 1px solid var(--warn-line);
+             border-radius: 6px; padding: .9rem 1rem; margin: 1.2rem 0; font-size: .95rem; }
+  .result { background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+            padding: 1rem 1.2rem; margin: 1rem 0; }
+  blockquote { margin: 0 0 .7rem; padding-left: .9rem; border-left: 3px solid var(--accent);
+               white-space: pre-wrap; font-size: .95rem; }
+  .meta { font-size: .85rem; color: var(--muted); }
+{% endblock %}
+{% block content %}
+<h1>Claim search</h1>
+<p class="subtitle">Paste a claim; get the closest verbatim passages from the
+primary-source record, or an honest report that none were found.</p>
+
+<form class="search" method="get" action="/search">
+  <input type="text" name="q" value="{{ q }}" placeholder="Paste a claim — e.g. &quot;Senator X said the bill cuts veterans' benefits&quot;" autofocus>
+  <div class="row">
+    <select name="figure">
+      <option value="">All tracked figures</option>
+      {% for f in figures %}
+      <option value="{{ f.slug }}" {% if f.slug == selected_figure %}selected{% endif %}>{{ f.full_name }}</option>
+      {% endfor %}
+    </select>
+    <input type="date" name="from" value="{{ date_from or '' }}">
+    <input type="date" name="to" value="{{ date_to or '' }}">
+    <button type="submit">Search the record</button>
+  </div>
+</form>
+
+{% if result and result.coverage %}
+<div class="coverage">
+  <strong>Corpus coverage:</strong>
+  {% for s in result.coverage.sources %}{{ s.units }} {{ s.source }} ({{ s.first }} – {{ s.last }}){{ "; " if not loop.last else "" }}{% else %}nothing ingested yet{% endfor %};
+  {{ result.coverage.statements_in_scope }} attributed statement(s) in scope.
+  {% if result.coverage.failed_packages %}
+    <strong>{{ result.coverage.failed_packages }} unit(s) failed ingestion and are NOT searchable.</strong>
+  {% endif %}
+  Absence of a match here is not evidence a statement was never made.
+</div>
+{% endif %}
+
+{% if q %}
+  {% if not result.threshold_met %}
+  <div class="nomatch">
+    <strong>No strong match found</strong> for this claim in the corpus described above
+    (best similarity {{ "%.0f"|format((result.matches[0].similarity or 0) * 100) if result.matches else 0 }}%,
+    threshold {{ "%.0f"|format(result.threshold * 100) }}%).
+    Weaker candidates are listed below for manual review &mdash; verify against the linked
+    primary sources before drawing any conclusion.
+  </div>
+  {% endif %}
+
+  {% for m in result.matches %}
+  <article class="result">
+    <blockquote>{{ m.chunk_text }}</blockquote>
+    <div class="meta">
+      <span class="badge {% if m.source_type == 'crec_extension' %}ext{% endif %}">{{ labels.get(m.source_type, m.source_type) }}</span>
+      {% if m.similarity is not none %}<span class="badge">similarity {{ "%.0f"|format(m.similarity * 100) }}%</span>{% endif %}
+      {% if m.lexical_hit %}<span class="badge">keyword match</span>{% endif %}
+      <span class="badge">attribution confidence {{ "%.0f"|format(m.confidence * 100) }}%</span>
+      <br>
+      <strong><a href="/figures/{{ m.figure_slug }}">{{ m.figure_name }}</a></strong>, {{ m.occurred_on }}{% if m.heading %} &mdash; {{ m.heading.split(';')[0] }}{% endif %}.
+      <a href="{{ m.source_url }}" rel="noopener">View this page of the Congressional Record</a>
+    </div>
+  </article>
+  {% else %}
+  <p class="meta">No candidates at all were retrieved for this query.</p>
+  {% endfor %}
+{% endif %}
+{% endblock %}

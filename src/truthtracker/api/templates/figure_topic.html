@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ figure.full_name }} on {{ topic.name }} — TruthTracker{% endblock %}
+{% block style %}
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+           gap: .8rem; margin: 1.2rem 0; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+          padding: .7rem .9rem; }
+  .tile .n { font: 700 1.4rem system-ui, sans-serif; }
+  .tile .l { font-size: .78rem; color: var(--muted); font-family: system-ui, sans-serif; }
+  .votes { border: 1px solid var(--line); border-radius: 6px; background: var(--card);
+           overflow: hidden; }
+  .vote-row { display: flex; gap: .8rem; padding: .55rem .9rem; align-items: baseline;
+              border-top: 1px solid var(--line); font-size: .9rem; flex-wrap: wrap; }
+  .vote-row:first-child { border-top: 0; }
+  .vote-date { color: var(--muted); font-size: .8rem; white-space: nowrap;
+               font-family: system-ui, sans-serif; }
+  .vote-q { flex: 1; min-width: 240px; }
+  blockquote { margin: .2rem 0; padding-left: .9rem; border-left: 3px solid var(--accent);
+               white-space: pre-wrap; font-size: .88rem; }
+{% endblock %}
+{% block content %}
+<p style="font-size: .85rem"><a href="/figures/{{ figure.slug }}">&larr; {{ figure.full_name }}</a></p>
+<h1>{{ figure.full_name }} on: {{ topic.name }}</h1>
+<p class="subtitle">Everything in this record tagged or classified under this topic,
+oldest first — statements beside votes, so change over time is visible.</p>
+
+<div class="coverage">
+  <strong>How items land here:</strong> votes appear when the underlying bill's official
+  Congress.gov policy area is "{{ topic.name }}". Statements appear either because they
+  cite such a bill (marked <em>cited bill</em>) or by machine text-similarity (marked with
+  its similarity score). Topic tags are navigation aids computed by this instance —
+  they are not part of the official record.
+</div>
+
+<div class="tiles">
+  <div class="tile"><div class="n">{{ stats.statements }}</div><div class="l">Statements</div></div>
+  <div class="tile"><div class="n">{{ stats.votes }}</div><div class="l">Roll-call votes</div></div>
+  <div class="tile"><div class="n">{{ stats.yea }}</div><div class="l">Voted Yea</div></div>
+  <div class="tile"><div class="n">{{ stats.nay }}</div><div class="l">Voted Nay</div></div>
+  {% if stats.first %}<div class="tile"><div class="n" style="font-size: .95rem">{{ stats.first }}<br>→ {{ stats.last }}</div><div class="l">Span covered</div></div>{% endif %}
+</div>
+
+{% if timeline %}
+<div class="votes">
+  {% for e in timeline %}
+  {% if e.kind == "vote" %}
+  <div class="vote-row">
+    <span class="vote-date">{{ e.date }}</span>
+    <span class="badge">Vote: {{ e.cast.position_raw }}</span>
+    <span class="vote-q">
+      {{ e.roll_call.question or "—" }}
+      <br><span style="font-size: .85rem"><a href="{{ e.bill.source_url }}" rel="noopener">{{ e.bill.bill_type|upper }} {{ e.bill.number }}{% if e.bill.title %}: {{ e.bill.title[:100] }}{% if e.bill.title|length > 100 %}…{% endif %}{% endif %}</a></span>
+    </span>
+    <span class="vote-date">{{ e.roll_call.result or "" }}</span>
+    <a style="font-size: .8rem" href="{{ e.roll_call.source_url }}" rel="noopener">source</a>
+  </div>
+  {% else %}
+  <div class="vote-row">
+    <span class="vote-date">{{ e.date }}</span>
+    <span class="badge {% if e.statement.source_type == 'crec_extension' %}ext{% endif %}">{{ timeline_badges.get(e.statement.source_type, "Statement") }}</span>
+    <span class="vote-q">
+      <blockquote>{{ e.statement.utterance_text[:300] }}{% if e.statement.utterance_text|length > 300 %}&nbsp;[…]{% endif %}</blockquote>
+      <span style="color: var(--muted); font-size: .82rem">
+        {% if e.statement.heading %}{{ e.statement.heading.split(';')[0] }} · {% endif %}
+        {% if e.tag.method == "bill_reference" %}tagged: cited bill{% else %}tagged: text similarity {{ "%.0f"|format(e.tag.confidence * 100) }}%{% endif %}
+      </span>
+    </span>
+    <a style="font-size: .8rem" href="{{ e.statement.source_url }}" rel="noopener">source</a>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% else %}
+<p style="color: var(--muted)">Nothing in the ingested record for this figure under this topic.</p>
+{% endif %}
+{% endblock %}

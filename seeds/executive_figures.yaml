@@ -1,0 +1,241 @@
+# Executive branch figures — President, VP, and heads of the 15 executive departments.
+#
+# VERIFICATION NOTE: officeholders and dates verified 2026-07-18 against
+# https://en.wikipedia.org/wiki/Second_cabinet_of_Donald_Trump and corroborating
+# news search. 2026 changes captured: Todd Blanche acting AG since 2026-04-02
+# (Bondi departed); Keith Sonderling acting Labor Secretary since 2026-04-20
+# (Chavez-DeRemer resigned); Markwayne Mullin confirmed at DHS 2026-03-24
+# (replacing Noem). Re-verify this file whenever the Cabinet changes; an
+# unknown date must be left null, never approximated.
+#
+# Bioguide IDs included only for figures with prior congressional service.
+
+- slug: donald-trump
+  full_name: Donald J. Trump
+  first_name: Donald
+  last_name: Trump
+  branch: executive
+  official_url: https://www.whitehouse.gov/administration/
+  role:
+    role_type: president
+    title: President of the United States
+    party: Republican
+    is_acting: false
+    start_date: 2025-01-20
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: jd-vance
+  full_name: JD Vance
+  first_name: JD
+  last_name: Vance
+  branch: executive
+  official_url: https://www.whitehouse.gov/administration/
+  role:
+    role_type: vice_president
+    title: Vice President of the United States
+    party: Republican
+    is_acting: false
+    start_date: 2025-01-20
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids:
+    bioguide: V000137
+
+- slug: marco-rubio
+  full_name: Marco Rubio
+  first_name: Marco
+  last_name: Rubio
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of State
+    is_acting: false
+    start_date: 2025-01-21
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids:
+    bioguide: R000595
+
+- slug: scott-bessent
+  full_name: Scott Bessent
+  first_name: Scott
+  last_name: Bessent
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of the Treasury
+    is_acting: false
+    start_date: 2025-01-28
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: pete-hegseth
+  full_name: Pete Hegseth
+  first_name: Pete
+  last_name: Hegseth
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Defense
+    is_acting: false
+    start_date: 2025-01-25
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: todd-blanche
+  full_name: Todd Blanche
+  first_name: Todd
+  last_name: Blanche
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Attorney General
+    is_acting: true
+    start_date: 2026-04-02
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: doug-burgum
+  full_name: Doug Burgum
+  first_name: Doug
+  last_name: Burgum
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of the Interior
+    is_acting: false
+    start_date: 2025-02-01
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: brooke-rollins
+  full_name: Brooke Rollins
+  first_name: Brooke
+  last_name: Rollins
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Agriculture
+    is_acting: false
+    start_date: 2025-02-13
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: howard-lutnick
+  full_name: Howard Lutnick
+  first_name: Howard
+  last_name: Lutnick
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Commerce
+    is_acting: false
+    start_date: 2025-02-21
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: keith-sonderling
+  full_name: Keith Sonderling
+  first_name: Keith
+  last_name: Sonderling
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Labor
+    is_acting: true
+    start_date: 2026-04-20
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: robert-f-kennedy-jr
+  full_name: Robert F. Kennedy Jr.
+  first_name: Robert
+  last_name: Kennedy
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Health and Human Services
+    is_acting: false
+    start_date: 2025-02-13
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: scott-turner
+  full_name: Scott Turner
+  first_name: Scott
+  last_name: Turner
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Housing and Urban Development
+    is_acting: false
+    start_date: 2025-02-05
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: sean-duffy
+  full_name: Sean Duffy
+  first_name: Sean
+  last_name: Duffy
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Transportation
+    is_acting: false
+    start_date: 2025-01-28
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids:
+    bioguide: D000614
+
+- slug: chris-wright
+  full_name: Chris Wright
+  first_name: Chris
+  last_name: Wright
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Energy
+    is_acting: false
+    start_date: 2025-02-03
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: linda-mcmahon
+  full_name: Linda McMahon
+  first_name: Linda
+  last_name: McMahon
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Education
+    is_acting: false
+    start_date: 2025-03-03
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids: {}
+
+- slug: doug-collins
+  full_name: Doug Collins
+  first_name: Doug
+  last_name: Collins
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Veterans Affairs
+    is_acting: false
+    start_date: 2025-02-05
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids:
+    bioguide: C001093
+
+- slug: markwayne-mullin
+  full_name: Markwayne Mullin
+  first_name: Markwayne
+  last_name: Mullin
+  branch: executive
+  role:
+    role_type: cabinet_secretary
+    title: Secretary of Homeland Security
+    is_acting: false
+    start_date: 2026-03-24
+    source_url: https://www.whitehouse.gov/administration/
+  external_ids:
+    bioguide: M001190

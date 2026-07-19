@@ -1,0 +1,14 @@
+{% macro card_html(card) %}
+<a class="fig-card" href="/figures/{{ card.figure.slug }}">
+  {% if card.portrait %}
+  <img class="portrait" src="/static/portraits/{{ card.figure.bioguide_id }}.jpg"
+       alt="Official portrait of {{ card.figure.full_name }}">
+  {% else %}
+  <div class="mono" aria-label="No portrait on file">{{ card.initials }}</div>
+  {% endif %}
+  <div class="fig-meta">
+    <div class="fig-name">{{ card.figure.full_name }}</div>
+    <div class="fig-role">{{ card.subtitle }}</div>
+  </div>
+</a>
+{% endmacro %}

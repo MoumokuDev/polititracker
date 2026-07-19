@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ promise.title }} — {{ figure.full_name }}{% endblock %}
+{% block style %}
+  blockquote { margin: .6rem 0 .8rem; padding-left: .9rem; border-left: 3px solid var(--accent);
+               white-space: pre-wrap; font-size: .98rem; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+           padding: 1rem 1.2rem; margin: 1rem 0; }
+  .assessment { border-left: 4px solid var(--warn-line); background: var(--warn-bg); }
+  .ev-row { display: flex; gap: .8rem; padding: .5rem 0; border-top: 1px solid var(--line);
+            font-size: .9rem; align-items: baseline; flex-wrap: wrap; }
+  .ev-row:first-of-type { border-top: 0; }
+  form.inline { display: grid; gap: .6rem; margin-top: .8rem; }
+  input[type=text], input[type=url], textarea, select {
+    font: inherit; font-size: .92rem; padding: .45rem .6rem; border: 1px solid var(--line);
+    border-radius: 4px; width: 100%; }
+  textarea { min-height: 4.5rem; }
+  button { font: inherit; padding: .4rem 1rem; background: var(--accent); color: #fff;
+           border: 0; border-radius: 4px; cursor: pointer; justify-self: start; }
+  button.danger { background: #8a2f2f; }
+  label { font-size: .82rem; color: var(--muted); font-family: system-ui, sans-serif; }
+{% endblock %}
+{% block content %}
+<p style="font-size: .85rem"><a href="/figures/{{ figure.slug }}">&larr; {{ figure.full_name }}</a></p>
+<h1>{{ promise.title }}</h1>
+<p class="subtitle">Editor's label · the record is the quote below.</p>
+
+<div class="panel">
+  <blockquote>{{ promise.quote }}</blockquote>
+  <div style="font-size: .87rem; color: var(--muted)">
+    {{ figure.full_name }}{% if promise.made_on %}, {{ promise.made_on }}{% endif %} ·
+    <a href="{{ promise.source_url }}" rel="noopener">primary source</a>
+    {% if promise.statement_id %} · <span class="badge">verbatim from the statement corpus</span>{% endif %}
+  </div>
+</div>
+
+{% if promise.status == "unassessed" %}
+<div class="panel">
+  <strong>{{ status_labels[promise.status] }}.</strong>
+  <span style="color: var(--muted); font-size: .92rem">No editorial judgment has been made.
+  The evidence below is presented for readers to weigh themselves.</span>
+</div>
+{% else %}
+<div class="panel assessment">
+  <strong>{{ status_labels[promise.status] }}</strong>
+  <p style="margin: .5rem 0; white-space: pre-wrap">{{ promise.assessment }}</p>
+  <div style="font-size: .83rem; color: var(--muted)">
+    Assessment by {{ promise.assessed_by }}, {{ promise.assessed_at.date() if promise.assessed_at }} —
+    this is the editor's judgment, not a record. The records are the linked evidence below.
+  </div>
+</div>
+{% endif %}
+
+<h2>Evidence on the record ({{ promise.evidence|length }})</h2>
+<div class="panel">
+  {% for e in promise.evidence %}
+  <div class="ev-row">
+    <span class="badge">{{ e.kind }}</span>
+    <span style="flex: 1; min-width: 200px">{{ e.note }}</span>
+    <a style="font-size: .82rem" href="{{ e.source_url }}" rel="noopener">source</a>
+  </div>
+  {% else %}
+  <p style="color: var(--muted); font-size: .9rem">No evidence attached yet.</p>
+  {% endfor %}
+
+  {% if editing %}
+  <form class="inline" method="post" action="/promises/{{ promise.id }}/evidence">
+    <div class="row" style="display: flex; gap: .6rem">
+      <select name="kind">
+        {% for k in evidence_kinds %}<option value="{{ k }}">{{ k }}</option>{% endfor %}
+      </select>
+      <input type="url" name="source_url" required placeholder="Primary source URL (required)">
+    </div>
+    <textarea name="note" required placeholder="What this record shows, factually — e.g. 'Voted Yea on H.R. 1234 (roll call 210, 2026-03-14)'"></textarea>
+    <button type="submit">Add evidence</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if editing %}
+<h2>Editorial assessment</h2>
+<div class="panel">
+  <form class="inline" method="post" action="/promises/{{ promise.id }}/status">
+    <div>
+      <label>Status (your judgment — it will be displayed as such, with your name)</label>
+      <select name="status">
+        {% for value, label in status_labels.items() %}
+        <option value="{{ value }}" {% if value == promise.status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Rationale (required for any status; cite the evidence above)</label>
+      <textarea name="assessment">{{ promise.assessment or "" }}</textarea>
+    </div>
+    <div>
+      <label>Assessed by</label>
+      <input type="text" name="assessed_by" value="{{ promise.assessed_by or editor_name }}">
+    </div>
+    <button type="submit">Save assessment</button>
+  </form>
+  <form method="post" action="/promises/{{ promise.id }}/delete" style="margin-top: 1rem"
+        onsubmit="return confirm('Delete this promise record and its evidence list?')">
+    <button class="danger" type="submit">Delete this promise record</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

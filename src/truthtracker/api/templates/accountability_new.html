@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Add accountability record — {{ figure.full_name }}{% endblock %}
+{% block style %}
+  form { display: grid; gap: .7rem; background: var(--card); border: 1px solid var(--line);
+         padding: 1.2rem; border-radius: 6px; max-width: 44rem; }
+  label { font-size: .85rem; color: var(--muted); font-family: system-ui, sans-serif; }
+  input[type=text], input[type=date], input[type=url], textarea, select {
+    font: inherit; padding: .5rem .7rem; border: 1px solid var(--line);
+    border-radius: 4px; width: 100%; }
+  textarea { min-height: 6rem; }
+  button { font: inherit; padding: .5rem 1.2rem; background: var(--accent); color: #fff;
+           border: 0; border-radius: 4px; cursor: pointer; justify-self: start; }
+  .rules { font-size: .85rem; color: var(--muted); max-width: 44rem; }
+{% endblock %}
+{% block content %}
+<h1>Add accountability record — {{ figure.full_name }}</h1>
+<p class="rules"><strong>Documented public records only.</strong> Every entry must
+describe an actual record — an indictment, a court order, an ethics committee
+document, an enforcement matter — and link to it. Reputation, rumor, and
+unpublished allegations are not records and must not be entered. A case that
+evolves gets a new entry per event (indictment, dismissal, verdict, pardon…);
+entries are never edited into verdicts.</p>
+
+<form method="post" action="/figures/{{ figure.slug }}/accountability">
+  <div>
+    <label for="record_type">Record type</label>
+    <select id="record_type" name="record_type">
+      {% for value, label in type_labels.items() %}
+      <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="title">Factual headline (what the record is, not what it implies)</label>
+    <input type="text" id="title" name="title" maxlength="250" required
+           placeholder="e.g. Indicted on federal bribery charges (S.D. Tex.)">
+  </div>
+  <div>
+    <label for="description">Factual summary of the record's contents</label>
+    <textarea id="description" name="description" required></textarea>
+  </div>
+  <div>
+    <label for="occurred_on">Date of the record/event</label>
+    <input type="date" id="occurred_on" name="occurred_on" required>
+  </div>
+  <div>
+    <label for="source_url">Primary/authoritative source URL (required)</label>
+    <input type="url" id="source_url" name="source_url" required>
+  </div>
+  <div>
+    <label for="docket_number">Docket / matter number (optional)</label>
+    <input type="text" id="docket_number" name="docket_number" maxlength="100">
+  </div>
+  <div>
+    <label for="status_note">Status note (optional — e.g. how the case ended)</label>
+    <input type="text" id="status_note" name="status_note" maxlength="300">
+  </div>
+  <button type="submit">Save record</button>
+</form>
+{% endblock %}

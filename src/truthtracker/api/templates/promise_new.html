@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Track a promise — {{ figure.full_name }}{% endblock %}
+{% block style %}
+  form { display: grid; gap: .7rem; background: var(--card); border: 1px solid var(--line);
+         padding: 1.2rem; border-radius: 6px; max-width: 44rem; }
+  label { font-size: .85rem; color: var(--muted); font-family: system-ui, sans-serif; }
+  input[type=text], input[type=date], input[type=url], textarea {
+    font: inherit; padding: .5rem .7rem; border: 1px solid var(--line);
+    border-radius: 4px; width: 100%; }
+  textarea { min-height: 8rem; }
+  button { font: inherit; padding: .5rem 1.2rem; background: var(--accent); color: #fff;
+           border: 0; border-radius: 4px; cursor: pointer; justify-self: start; }
+  .rules { font-size: .85rem; color: var(--muted); max-width: 44rem; }
+{% endblock %}
+{% block content %}
+<h1>Track a promise — {{ figure.full_name }}</h1>
+<p class="rules">A promise entry is a <strong>record</strong>: the person's verbatim words,
+when they said them, and a primary source anyone can check. Paraphrase goes only in the
+short label, which is displayed as your paraphrase. If the quote is linked to a statement
+in the corpus, it must match those words exactly (trim, don't reword).</p>
+
+<form method="post" action="/figures/{{ figure.slug }}/promises">
+  <div>
+    <label for="title">Short label (your paraphrase, shown as such)</label>
+    <input type="text" id="title" name="title" maxlength="200" required
+           placeholder="e.g. Pass the border security bill within the first year">
+  </div>
+  <div>
+    <label for="quote">Verbatim quote</label>
+    <textarea id="quote" name="quote" required>{{ prefill.quote }}</textarea>
+  </div>
+  <div>
+    <label for="source_url">Primary source URL (required — no claim without a source)</label>
+    <input type="url" id="source_url" name="source_url" required value="{{ prefill.source_url }}">
+  </div>
+  <div>
+    <label for="made_on">Date the promise was made (leave blank if not verified)</label>
+    <input type="date" id="made_on" name="made_on" value="{{ prefill.made_on }}">
+  </div>
+  <input type="hidden" name="statement_id" value="{{ prefill.statement_id }}">
+  <button type="submit">Save promise record</button>
+</form>
+{% endblock %}

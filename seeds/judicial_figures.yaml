@@ -1,0 +1,132 @@
+# The nine sitting Supreme Court justices.
+#
+# VERIFICATION NOTE: composition verified 2026-07-18 against
+# https://www.supremecourt.gov/about/biographies.aspx (via search). start_date
+# is the date the judicial oath was taken. No party field — justices have no
+# party affiliation; presenting one would editorialize.
+
+- slug: john-roberts
+  full_name: John G. Roberts, Jr.
+  first_name: John
+  last_name: Roberts
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Chief Justice of the United States
+    is_acting: false
+    start_date: 2005-09-29
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
+
+- slug: clarence-thomas
+  full_name: Clarence Thomas
+  first_name: Clarence
+  last_name: Thomas
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Associate Justice
+    is_acting: false
+    start_date: 1991-10-23
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
+
+- slug: samuel-alito
+  full_name: Samuel A. Alito, Jr.
+  first_name: Samuel
+  last_name: Alito
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Associate Justice
+    is_acting: false
+    start_date: 2006-01-31
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
+
+- slug: sonia-sotomayor
+  full_name: Sonia Sotomayor
+  first_name: Sonia
+  last_name: Sotomayor
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Associate Justice
+    is_acting: false
+    start_date: 2009-08-08
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
+
+- slug: elena-kagan
+  full_name: Elena Kagan
+  first_name: Elena
+  last_name: Kagan
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Associate Justice
+    is_acting: false
+    start_date: 2010-08-07
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
+
+- slug: neil-gorsuch
+  full_name: Neil M. Gorsuch
+  first_name: Neil
+  last_name: Gorsuch
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Associate Justice
+    is_acting: false
+    start_date: 2017-04-10
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
+
+- slug: brett-kavanaugh
+  full_name: Brett M. Kavanaugh
+  first_name: Brett
+  last_name: Kavanaugh
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Associate Justice
+    is_acting: false
+    start_date: 2018-10-06
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
+
+- slug: amy-coney-barrett
+  full_name: Amy Coney Barrett
+  first_name: Amy
+  last_name: Barrett
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Associate Justice
+    is_acting: false
+    start_date: 2020-10-27
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
+
+- slug: ketanji-brown-jackson
+  full_name: Ketanji Brown Jackson
+  first_name: Ketanji
+  last_name: Jackson
+  branch: judicial
+  official_url: https://www.supremecourt.gov/about/biographies.aspx
+  role:
+    role_type: scotus_justice
+    title: Associate Justice
+    is_acting: false
+    start_date: 2022-06-30
+    source_url: https://www.supremecourt.gov/about/biographies.aspx
+  external_ids: {}
