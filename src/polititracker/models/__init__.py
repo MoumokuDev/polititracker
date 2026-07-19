@@ -15,6 +15,7 @@ from polititracker.models.promise import (
     PromiseEvidence,
 )
 from polititracker.models.provenance import IngestionRun, SourceFetch, SourcePackage
+from polititracker.models.stat import FigureStat
 from polititracker.models.statement import EMBEDDING_DIM, Statement, StatementChunk
 from polititracker.models.topic import StatementTopic, Topic
 
@@ -33,6 +34,7 @@ __all__ = [
     "ExternalId",
     "Figure",
     "FigureRole",
+    "FigureStat",
     "FinanceSource",
     "FinanceSummary",
     "IngestionRun",

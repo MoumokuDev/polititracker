@@ -73,7 +73,18 @@
   <div class="tile"><div class="n">{{ stats.became_law }}</div><div class="l">Of those, became law</div></div>
   <div class="tile"><div class="n">{{ stats.cosponsored }}</div><div class="l">Cosponsored</div></div>
   {% endif %}
+  {% if party_unity %}
+  <div class="tile"><div class="n">{{ party_unity.value }}%</div><div class="l">Voted with own party on divided votes</div></div>
+  {% endif %}
 </div>
+{% if party_unity %}
+<p class="roles-list" style="margin-top: -.6rem">
+  Party unity: on the {{ party_unity.denominator }} recorded roll calls where
+  majorities of the two parties took opposite positions, voted with their own
+  party's majority {{ party_unity.numerator }} times
+  ({{ party_unity.value }}%). Yea/Nay votes only; absences excluded. Computed
+  from the full-chamber results stored with each roll call.</p>
+{% endif %}
 
 {% if committees %}
 <h2>Committee assignments</h2>

@@ -61,6 +61,12 @@ def topics_daily() -> None:
     _job(topics.run)
 
 
+def stats_daily() -> None:
+    from polititracker.analytics import party_unity
+
+    _job(party_unity.run)
+
+
 def portraits_weekly() -> None:
     from polititracker.ingestion.adapters import portraits
 
@@ -110,6 +116,7 @@ def main() -> None:
     scheduler.add_job(bills_daily, "cron", hour=13, minute=15)
     scheduler.add_job(index_daily, "cron", hour=13, minute=45)
     scheduler.add_job(topics_daily, "cron", hour=14, minute=5)
+    scheduler.add_job(stats_daily, "cron", hour=13, minute=20)
     scheduler.add_job(portraits_weekly, "cron", day_of_week="mon", hour=14, minute=15)
     scheduler.add_job(finance_weekly, "cron", day_of_week="sun", hour=14, minute=0)
     scheduler.add_job(scotus_daily, "cron", hour=14, minute=30)

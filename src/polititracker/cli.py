@@ -88,6 +88,8 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("ingest-committees", help="Committee assignments (congress-legislators)")
 
+    sub.add_parser("compute-stats", help="Recompute per-figure statistics (party unity)")
+
     p = sub.add_parser(
         "ingest-sponsorship", help="Sponsored/cosponsored legislation per member"
     )
@@ -137,6 +139,10 @@ def main(argv: list[str] | None = None) -> int:
         from polititracker.ingestion.adapters import committees
 
         return _run(committees.run)
+    if args.command == "compute-stats":
+        from polititracker.analytics import party_unity
+
+        return _run(party_unity.run)
     if args.command == "ingest-sponsorship":
         from polititracker.ingestion.adapters import member_sponsorship
 

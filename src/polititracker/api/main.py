@@ -29,6 +29,7 @@ from polititracker.models import (
     CommitteeMembership,
     DisclosureFiling,
     Figure,
+    FigureStat,
     FinanceSource,
     FinanceSummary,
     IngestionRun,
@@ -445,6 +446,11 @@ async def figure_page(
             )
         )
     ).scalar_one()
+    party_unity = await session.scalar(
+        select(FigureStat).where(
+            FigureStat.figure_id == figure.id, FigureStat.key == "party_unity"
+        )
+    )
 
     return templates.TemplateResponse(
         request,
@@ -475,6 +481,7 @@ async def figure_page(
                 "cosponsored": cosponsored_total,
             },
             "committees": committees,
+            "party_unity": party_unity,
             "timeline": timeline,
             "finance": finance,
             "finance_sources": finance_sources,
