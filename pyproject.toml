@@ -1,5 +1,5 @@
 [project]
-name = "truthtracker"
+name = "polititracker"
 version = "0.1.0"
 description = "Self-hostable accountability dashboards for US federal officials, built on verifiable primary sources."
 readme = "README.md"
@@ -35,7 +35,7 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"truthtracker.api" = ["templates/*.html"]
+"polititracker.api" = ["templates/*.html"]
 
 [tool.ruff]
 line-length = 100
@@ -48,4 +48,4 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 # B008: FastAPI's Depends(...) in defaults is the framework's intended idiom.
-"src/truthtracker/api/*" = ["B008"]
+"src/polititracker/api/*" = ["B008"]

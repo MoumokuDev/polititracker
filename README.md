@@ -1,4 +1,4 @@
-# TruthTracker
+# PolitiTracker
 
 Self-hostable accountability dashboards for US federal officials across all three
 branches. The core value is **verifiable provenance**: paste a claim like
@@ -39,7 +39,7 @@ Phase 1, build step 2 complete:
   Fusion), `GET /api/search` JSON endpoint, and a server-rendered search UI
   at `/`. Every response carries corpus-coverage metadata; results below the
   similarity threshold are reported as "no strong match" — never as proof a
-  statement wasn't made. `python -m truthtracker.cli index-statements` chunks
+  statement wasn't made. `python -m polititracker.cli index-statements` chunks
   and embeds anything new; the worker runs it daily after ingestion.
 
 - **Graphical directory UI** — `/` is a portrait directory arranged by
@@ -92,11 +92,11 @@ CourtListener bulk data for historical SCOTUS backfill (REST budget is 125/day).
 ## Ingestion commands
 
 ```bash
-python -m truthtracker.cli seed-figures
-python -m truthtracker.cli ingest-crec --start 2026-07-01 --end 2026-07-16
-python -m truthtracker.cli ingest-house-votes [--limit N]
-python -m truthtracker.cli ingest-senate-votes [--limit N]
-python -m truthtracker.cli enrich-bills [--limit N]
+python -m polititracker.cli seed-figures
+python -m polititracker.cli ingest-crec --start 2026-07-01 --end 2026-07-16
+python -m polititracker.cli ingest-house-votes [--limit N]
+python -m polititracker.cli ingest-senate-votes [--limit N]
+python -m polititracker.cli enrich-bills [--limit N]
 ```
 
 All adapters are idempotent (re-runs skip ingested units) and record every run
@@ -120,8 +120,8 @@ uv venv --python 3.12 .venv
 uv pip install -e ".[dev]"
 
 alembic upgrade head                     # create schema
-python -m truthtracker.cli seed-figures  # TX delegation + exec/judicial seeds
-python -m truthtracker.api               # dev server (required on Windows —
+python -m polititracker.cli seed-figures  # TX delegation + exec/judicial seeds
+python -m polititracker.api               # dev server (required on Windows —
                                          # sets the selector event loop psycopg needs)
 ```
 
@@ -136,7 +136,7 @@ docker compose up -d        # db + api + worker
 ## Layout
 
 ```
-src/truthtracker/
+src/polititracker/
   config.py          settings from .env
   db.py              sync + async engines/sessions
   models/            SQLAlchemy models (schema of record)

@@ -4,8 +4,8 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from truthtracker.config import get_settings
-from truthtracker.models import Base
+from polititracker.config import get_settings
+from polititracker.models import Base
 
 config = context.config
 if config.config_file_name is not None:

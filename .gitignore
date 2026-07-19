@@ -17,4 +17,4 @@ pgdata/
 *.dump
 
 # Fetched artifacts (re-downloadable via `fetch-portraits`; provenance in manifest)
-src/truthtracker/api/static/portraits/
+src/polititracker/api/static/portraits/

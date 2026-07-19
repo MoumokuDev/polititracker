@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+{% block title %}{{ figure.full_name }} — PolitiTracker{% endblock %}
+{% block style %}
+  .head { display: flex; gap: 1.4rem; align-items: flex-start; flex-wrap: wrap; }
+  .head img, .head .mono { width: 168px; border-radius: 6px; border: 1px solid var(--line); }
+  .mono { aspect-ratio: 9 / 11; display: flex; align-items: center; justify-content: center;
+          background: #e8eaee; color: #8a8f98; font: 600 2.4rem system-ui, sans-serif; }
+  .head-meta { flex: 1; min-width: 260px; }
+  .roleline { color: var(--muted); margin: .1rem 0 .6rem; }
+  .links { font-size: .85rem; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+           gap: .8rem; margin: 1.4rem 0; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+          padding: .7rem .9rem; }
+  .tile .n { font: 700 1.5rem system-ui, sans-serif; }
+  .tile .l { font-size: .78rem; color: var(--muted); font-family: system-ui, sans-serif; }
+  .votes { border: 1px solid var(--line); border-radius: 6px; background: var(--card);
+           overflow: hidden; }
+  .vote-row { display: flex; gap: .8rem; padding: .55rem .9rem; align-items: baseline;
+              border-top: 1px solid var(--line); font-size: .9rem; flex-wrap: wrap; }
+  .vote-row:first-child { border-top: 0; }
+  .vote-date { color: var(--muted); font-size: .8rem; white-space: nowrap;
+               font-family: system-ui, sans-serif; }
+  .vote-q { flex: 1; min-width: 240px; }
+  .result { background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+            padding: 1rem 1.2rem; margin: 1rem 0; }
+  blockquote { margin: 0 0 .7rem; padding-left: .9rem; border-left: 3px solid var(--accent);
+               white-space: pre-wrap; font-size: .95rem; }
+  form.scoped { display: flex; gap: .6rem; margin: .6rem 0 0; }
+  form.scoped input[type=text] { flex: 1; font: inherit; padding: .5rem .7rem;
+                                 border: 1px solid var(--line); border-radius: 4px; }
+  form.scoped button { font: inherit; padding: .45rem 1rem; background: var(--accent);
+                       color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+  .roles-list { font-size: .88rem; color: var(--muted); }
+{% endblock %}
+{% block content %}
+<div class="head">
+  {% if portrait %}
+  <img src="/static/portraits/{{ figure.slug }}.jpg"
+       alt="Official portrait of {{ figure.full_name }}">
+  {% else %}
+  <div class="mono">{{ initials }}</div>
+  {% endif %}
+  <div class="head-meta">
+    <h1>{{ figure.full_name }}</h1>
+    <div class="roleline">
+      {{ current_role.title }}{% if current_role.is_acting %} (Acting){% endif %}
+      {%- if current_role.state %} — {{ current_role.state }}{% if current_role.district is not none %}-{{ current_role.district }}{% endif %}{% endif %}
+      {% if current_role.party %}<span class="badge">{{ current_role.party }}</span>{% endif %}
+      {% if current_role.start_date %}<span class="badge">since {{ current_role.start_date }}</span>{% endif %}
+    </div>
+    <div class="links">
+      {% if figure.official_url %}<a href="{{ figure.official_url }}" rel="noopener">Official site</a> ·{% endif %}
+      {% if figure.bioguide_id %}<a href="https://bioguide.congress.gov/search/bio/{{ figure.bioguide_id }}" rel="noopener">Biographical Directory entry</a> ·{% endif %}
+      <a href="/api/figures/{{ figure.slug }}">JSON</a>
+    </div>
+    <form class="scoped" method="get" action="/search">
+      <input type="hidden" name="figure" value="{{ figure.slug }}">
+      <input type="text" name="q" placeholder="Did {{ figure.last_name or figure.full_name }} say… (search this record)">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+</div>
+
+<div class="tiles">
+  <div class="tile"><div class="n">{{ stats.votes_total }}</div><div class="l">Roll-call votes recorded</div></div>
+  <div class="tile"><div class="n">{{ stats.yea }}</div><div class="l">Voted Yea / Aye</div></div>
+  <div class="tile"><div class="n">{{ stats.nay }}</div><div class="l">Voted Nay / No</div></div>
+  <div class="tile"><div class="n">{{ stats.not_voting }}{% if stats.missed_pct is not none %} <span style="font-size: .85rem">({{ stats.missed_pct }}%)</span>{% endif %}</div><div class="l">Votes missed</div></div>
+  <div class="tile"><div class="n">{{ stats.statements }}</div><div class="l">Statements on record</div></div>
+  {% if stats.sponsored %}
+  <div class="tile"><div class="n">{{ stats.sponsored }}</div><div class="l">Bills &amp; resolutions introduced</div></div>
+  <div class="tile"><div class="n">{{ stats.became_law }}</div><div class="l">Of those, became law</div></div>
+  <div class="tile"><div class="n">{{ stats.cosponsored }}</div><div class="l">Cosponsored</div></div>
+  {% endif %}
+</div>
+
+{% if committees %}
+<h2>Committee assignments</h2>
+<div class="votes">
+  {% for m, c in committees %}
+  <div class="vote-row">
+    <span class="vote-q">{% if c.url %}<a href="{{ c.url }}" rel="noopener">{{ c.name }}</a>{% else %}{{ c.name }}{% endif %}</span>
+    {% if m.role_title %}<span class="badge">{{ m.role_title }}</span>{% endif %}
+    {% if m.rank %}<span class="vote-date">rank {{ m.rank }} ({{ m.party_side }})</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+<p class="roles-list" style="margin-top: .5rem">Current assignments per
+unitedstates/congress-legislators. Committee jurisdiction is useful context when
+reading the votes, disclosures, and contribution sources on this page.</p>
+{% endif %}
+
+<div class="coverage">
+  These figures reflect only what this instance has ingested:
+  {% for s in coverage.sources %}{{ s.units }} {{ s.source }} ({{ s.first }} – {{ s.last }}){{ "; " if not loop.last else "" }}{% else %}no statement sources yet{% endfor %},
+  plus the roll-call votes listed below. They are not lifetime totals.
+</div>
+
+{% if figure_topics %}
+<h2>Topics in this record</h2>
+<p style="margin: -.2rem 0 .6rem">
+  {% for t in figure_topics %}
+  <a class="badge" style="text-decoration: none; margin-bottom: .3rem"
+     href="/figures/{{ figure.slug }}/topics/{{ t.id }}">{{ t.name }}
+     · {{ t.statements }} stmt / {{ t.votes }} votes</a>
+  {% endfor %}
+</p>
+<p class="roles-list" style="margin-top: .3rem; font-size: .8rem">Topic tags are
+machine-computed navigation aids (method shown on each item), not part of the record.</p>
+{% endif %}
+
+<h2>Campaign promises &amp; commitments
+  {% if editing %}<a style="font-size: .8rem; font-weight: normal; text-transform: none; letter-spacing: 0"
+     href="/figures/{{ figure.slug }}/promises/new">+ track a promise</a>{% endif %}</h2>
+{% if promises %}
+<div class="votes">
+  {% for p in promises %}
+  <div class="vote-row">
+    <span class="vote-date">{{ p.made_on or "date n/a" }}</span>
+    <span class="badge {% if p.status in ('not_kept', 'partially_kept') %}ext{% endif %}">{{ promise_status_labels[p.status] }}</span>
+    <span class="vote-q">
+      <a href="/promises/{{ p.id }}"><strong>{{ p.title }}</strong></a>
+      <span style="color: var(--muted); font-size: .8rem">(editor's label)</span>
+      <blockquote style="margin: .25rem 0; font-size: .88rem">{{ p.quote[:220] }}{% if p.quote|length > 220 %}&nbsp;[…]{% endif %}</blockquote>
+      <span style="color: var(--muted); font-size: .82rem">{{ p.evidence|length }} piece(s) of evidence on record
+      {% if p.assessed_by %} · assessed by {{ p.assessed_by }}{% endif %}</span>
+    </span>
+    <a style="font-size: .8rem" href="{{ p.source_url }}" rel="noopener">source</a>
+  </div>
+  {% endfor %}
+</div>
+<p class="roles-list" style="margin-top: .5rem">Promise quotes are verbatim and always
+link to a primary source. Kept/not-kept statuses are attributed editorial judgments,
+never computed by this tool — the evidence is on each promise's page for readers to weigh.</p>
+{% else %}
+<p class="roles-list">No promises tracked for this figure yet.
+{% if editing %}<a href="/figures/{{ figure.slug }}/promises/new">Track the first one</a> —
+a promise entry needs the verbatim quote and a primary source.{% endif %}</p>
+{% endif %}
+
+<h2>Accountability record — documented public records
+  {% if editing %}<a style="font-size: .8rem; font-weight: normal; text-transform: none; letter-spacing: 0"
+     href="/figures/{{ figure.slug }}/accountability/new">+ add a record</a>{% endif %}</h2>
+{% if accountability %}
+<div class="votes">
+  {% for r in accountability %}
+  <div class="vote-row">
+    <span class="vote-date">{{ r.occurred_on }}</span>
+    <span class="badge">{{ record_type_labels.get(r.record_type, r.record_type) }}</span>
+    <span class="vote-q">
+      <strong>{{ r.title }}</strong>
+      <br><span style="font-size: .88rem">{{ r.description }}</span>
+      {% if r.docket_number %}<br><span style="color: var(--muted); font-size: .82rem">Docket: {{ r.docket_number }}</span>{% endif %}
+      {% if r.status_note %}<br><span style="color: var(--muted); font-size: .82rem">{{ r.status_note }}</span>{% endif %}
+      {% if r.record_type in accusatory_types %}
+      <br><span style="color: var(--muted); font-size: .82rem; font-style: italic">
+        This record documents an accusation or inquiry, not a finding of wrongdoing.
+        The presumption of innocence applies.</span>
+      {% endif %}
+    </span>
+    <a style="font-size: .8rem" href="{{ r.source_url }}" rel="noopener">source</a>
+    {% if editing %}
+    <form method="post" action="/accountability/{{ r.id }}/delete" style="margin: 0"
+          onsubmit="return confirm('Delete this record entry?')">
+      <button style="font-size: .72rem; padding: .1rem .5rem; background: none; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); cursor: pointer" type="submit">delete</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+<p class="roles-list" style="margin-top: .5rem">Entries are documented public records
+(court filings, ethics documents, enforcement matters), each linked to its source.
+A case's history is shown as dated events; this tool renders no verdicts.</p>
+{% else %}
+<p class="roles-list">No documented accountability records on file for this figure.
+This section holds only public records — court filings, ethics committee documents,
+enforcement matters — never reputation or unpublished allegations.</p>
+{% endif %}
+
+{% if current_role and current_role.role_type in ("rep", "sen") %}
+<h2>Financial disclosure filings (STOCK Act)</h2>
+{% if disclosures %}
+<div class="votes">
+  {% for d in disclosures %}
+  <div class="vote-row">
+    <span class="vote-date">{{ d.filing_date or d.filing_year }}</span>
+    <span class="badge">{{ filing_type_labels.get(d.filing_type_code, "Filing (" + d.filing_type_code + ")") }}</span>
+    <span class="vote-q">Filing {{ d.doc_id }}, {{ d.filing_year }}</span>
+    <a style="font-size: .8rem" href="{{ d.source_url }}" rel="noopener">official PDF</a>
+  </div>
+  {% endfor %}
+</div>
+<p class="roles-list" style="margin-top: .5rem">
+  {{ disclosure_total }} filing(s) on the Clerk of the House public index
+  {% if disclosure_total > disclosures|length %}(most recent {{ disclosures|length }} shown){% endif %}.
+  This tool lists official filings and links the documents; it does not interpret
+  the transactions inside them.</p>
+{% elif current_role.role_type == "sen" %}
+<p class="roles-list">Senate financial disclosures are filed with the Secretary of the
+Senate — <a href="https://efdsearch.senate.gov/search/" rel="noopener">search this
+senator's filings on efdsearch.senate.gov</a>.</p>
+{% else %}
+<p class="roles-list">No filings ingested yet (run <code>ingest-disclosures</code>).</p>
+{% endif %}
+{% endif %}
+
+<h2>Recent activity — statements and votes, one record</h2>
+{% if timeline %}
+<div class="votes">
+  {% for e in timeline %}
+  {% if e.kind == "vote" %}
+  <div class="vote-row">
+    <span class="vote-date">{{ e.date }}</span>
+    <span class="badge">Vote: {{ e.cast.position_raw }}</span>
+    <span class="vote-q">
+      {{ e.roll_call.question or "—" }}
+      {% if e.bill %}
+      <br><span style="font-size: .85rem">
+        <a href="{{ e.bill.source_url }}" rel="noopener">{{ e.bill.bill_type|upper }} {{ e.bill.number }}{% if e.bill.title %}: {{ e.bill.title[:110] }}{% if e.bill.title|length > 110 %}…{% endif %}{% endif %}</a>
+        {% if e.bill.policy_area %}<span class="badge">{{ e.bill.policy_area }}</span>{% endif %}
+      </span>
+      {% if e.bill.summary %}
+      <details style="font-size: .85rem; margin-top: .25rem">
+        <summary style="cursor: pointer; color: var(--muted)">What this bill does (CRS summary)</summary>
+        <div style="white-space: pre-wrap; margin: .4rem 0 .2rem; color: var(--ink)">{{ e.bill.summary[:1200] }}{% if e.bill.summary|length > 1200 %} […]{% endif %}</div>
+        <span style="color: var(--muted)">Summary by the Congressional Research Service{% if e.bill.summary_date %}, {{ e.bill.summary_date }}{% endif %} —
+        <a href="{{ e.bill.source_url }}" rel="noopener">full text and history on Congress.gov</a></span>
+      </details>
+      {% endif %}
+      {% endif %}
+    </span>
+    <span class="vote-date">{{ e.roll_call.result or "" }}</span>
+    <a style="font-size: .8rem" href="{{ e.roll_call.source_url }}" rel="noopener">source</a>
+  </div>
+  {% else %}
+  <div class="vote-row">
+    <span class="vote-date">{{ e.date }}</span>
+    <span class="badge {% if e.statement.source_type == 'crec_extension' %}ext{% endif %}">{{ timeline_badges.get(e.statement.source_type, "Statement") }}</span>
+    <span class="vote-q">
+      <blockquote style="margin: .2rem 0; font-size: .88rem">{{ e.statement.utterance_text[:260] }}{% if e.statement.utterance_text|length > 260 %}&nbsp;[…]{% endif %}</blockquote>
+      <span style="color: var(--muted); font-size: .82rem">{% if e.statement.heading %}{{ e.statement.heading.split(';')[0] }} · {% endif %}attribution confidence {{ "%.0f"|format(e.statement.confidence * 100) }}%
+      {% if editing %} · <a href="/figures/{{ figure.slug }}/promises/new?statement_id={{ e.statement.id }}">track as promise</a>{% endif %}</span>
+    </span>
+    <a style="font-size: .8rem" href="{{ e.statement.source_url }}" rel="noopener">source</a>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% else %}
+<p class="roles-list">No votes or statements ingested for this figure yet.</p>
+{% endif %}
+
+<h2>Campaign finance — committee totals by two-year cycle</h2>
+{% if finance %}
+<div class="votes">
+  {% for f in finance %}
+  <div class="vote-row">
+    <span class="vote-date">{{ f.cycle }}</span>
+    <span class="vote-q">
+      receipts ${{ "{:,.0f}".format(f.total_receipts or 0) }}
+      · disbursements ${{ "{:,.0f}".format(f.total_disbursements or 0) }}
+      · cash on hand ${{ "{:,.0f}".format(f.cash_on_hand or 0) }}
+      {% if f.debts %} · debts ${{ "{:,.0f}".format(f.debts) }}{% endif %}
+      {% if f.individual_itemized or f.pac_contributions %}
+      <br><span style="font-size: .84rem">Sources:
+        {% if f.individual_itemized %}individuals (itemized) ${{ "{:,.0f}".format(f.individual_itemized) }}{% endif %}
+        {% if f.individual_unitemized %} · small-dollar (unitemized) ${{ "{:,.0f}".format(f.individual_unitemized) }}{% endif %}
+        {% if f.pac_contributions %} · PACs &amp; other committees ${{ "{:,.0f}".format(f.pac_contributions) }}{% endif %}
+        {% if f.party_contributions %} · party committees ${{ "{:,.0f}".format(f.party_contributions) }}{% endif %}
+        {% if f.candidate_self %} · self-funded ${{ "{:,.0f}".format(f.candidate_self) }}{% endif %}
+      </span>
+      {% endif %}
+      <br><span style="color: var(--muted); font-size: .82rem">candidate committee {{ f.fec_candidate_id }}{% if f.coverage_end_date %} · reported through {{ f.coverage_end_date }}{% endif %}</span>
+    </span>
+    <a style="font-size: .8rem" href="{{ f.source_url }}" rel="noopener">FEC.gov</a>
+  </div>
+  {% endfor %}
+</div>
+
+{% if finance_sources %}
+<h2>Largest reported contribution sources, by contributor-reported employer</h2>
+{% for cycle, sources in finance_sources.items() %}
+<h3 style="font-size: .92rem; margin: 1rem 0 .4rem; color: var(--muted)">{{ cycle }} cycle</h3>
+<div class="votes">
+  {% for s in sources %}
+  <div class="vote-row">
+    <span class="vote-q">{{ "Not reported" if s.name == "NULL" else s.name }}</span>
+    <span class="vote-date">{{ s.contribution_count or "?" }} contribution(s)</span>
+    <span class="vote-date"><strong>${{ "{:,.0f}".format(s.total or 0) }}</strong></span>
+    <a style="font-size: .8rem" href="{{ s.source_url }}" rel="noopener">FEC.gov</a>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+<p class="roles-list" style="margin-top: .5rem">
+  Aggregated by the FEC from itemized Schedule A receipts; the employer field is
+  self-reported by contributors ("Retired", "Self-employed", and blank entries are
+  common and shown as filed). Small-dollar unitemized donations are not included
+  in these rows. No individual contributor data is stored or displayed.</p>
+{% endif %}
+<p class="roles-list" style="margin-top: .5rem">Committee-level totals from FEC filings.
+No individual contributor data is stored or displayed.</p>
+{% else %}
+<p class="roles-list">No FEC filings ingested for this figure
+{%- if figure.branch != "legislative" %} (campaign finance applies to elected candidates){% endif %}.</p>
+{% endif %}
+
+<h2>Role history</h2>
+<div class="roles-list">
+  {% for r in figure.roles %}
+  {{ r.title }}{% if r.is_acting %} (Acting){% endif %}{% if r.state %}, {{ r.state }}{% if r.district is not none %}-{{ r.district }}{% endif %}{% endif %}{% if r.party %} · {{ r.party }}{% endif %}
+  · {{ r.start_date or "start date not verified" }} – {{ r.end_date or "present" }}
+  {% if r.source_url %}· <a href="{{ r.source_url }}" rel="noopener">source</a>{% endif %}<br>
+  {% endfor %}
+</div>
+{% endblock %}

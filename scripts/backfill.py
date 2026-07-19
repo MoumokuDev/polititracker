@@ -13,14 +13,14 @@ import sys
 import time
 from datetime import date
 
-from truthtracker.db import get_session
-from truthtracker.ingestion.adapters import (
+from polititracker.db import get_session
+from polititracker.ingestion.adapters import (
     congress_gov_bills,
     govinfo_crec,
     house_votes,
     senate_votes,
 )
-from truthtracker.search import indexer
+from polititracker.search import indexer
 
 logging.basicConfig(
     level=logging.INFO,

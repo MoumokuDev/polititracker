@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Coverage &amp; freshness — PolitiTracker{% endblock %}
+{% block style %}
+  .votes { border: 1px solid var(--line); border-radius: 6px; background: var(--card);
+           overflow: hidden; margin-bottom: 1rem; }
+  .vote-row { display: flex; gap: .8rem; padding: .5rem .9rem; align-items: baseline;
+              border-top: 1px solid var(--line); font-size: .88rem; flex-wrap: wrap; }
+  .vote-row:first-child { border-top: 0; }
+  .vote-date { color: var(--muted); font-size: .8rem; font-family: system-ui, sans-serif;
+               white-space: nowrap; }
+  .grow { flex: 1; min-width: 180px; }
+  .fail { color: #8a2f2f; }
+{% endblock %}
+{% block content %}
+<h1>Coverage &amp; freshness</h1>
+<p class="subtitle">What this instance has actually ingested, when it last succeeded,
+and what failed. An accountability tool should be accountable: absence of a match in
+search is only meaningful relative to the coverage listed here.</p>
+
+<h2>Corpus coverage by source</h2>
+<div class="votes">
+  {% for s in coverage.sources %}
+  <div class="vote-row">
+    <span class="grow">{{ s.source }}</span>
+    <span class="vote-date">{{ s.units }} unit(s)</span>
+    <span class="vote-date">{{ s.first }} – {{ s.last }}</span>
+  </div>
+  {% else %}
+  <div class="vote-row">No statement sources ingested yet.</div>
+  {% endfor %}
+  <div class="vote-row">
+    <span class="grow">Attributed statements in corpus</span>
+    <span class="vote-date">{{ coverage.statements_in_scope }}</span>
+  </div>
+</div>
+
+<h2>Last successful run per adapter</h2>
+<div class="votes">
+  {% for adapter, finished in last_success %}
+  <div class="vote-row">
+    <span class="grow">{{ adapter }}</span>
+    <span class="vote-date">{{ finished.strftime("%Y-%m-%d %H:%M UTC") if finished }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<h2>Failed ingestion units {% if failed_packages %}<span class="fail">({{ failed_packages|length }})</span>{% endif %}</h2>
+{% if failed_packages %}
+<div class="votes">
+  {% for p in failed_packages %}
+  <div class="vote-row">
+    <span class="grow fail">{{ p.package_id }}</span>
+    <span class="vote-date">{{ p.adapter }} · {{ p.issue_date }}</span>
+    <span class="vote-date fail">NOT searchable</span>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="roles-list">None — every attempted unit is ingested and searchable.</p>
+{% endif %}
+
+<h2>Recent ingestion runs</h2>
+<div class="votes">
+  {% for r in runs %}
+  <div class="vote-row">
+    <span class="vote-date">{{ r.started_at.strftime("%Y-%m-%d %H:%M") }}</span>
+    <span class="grow">{{ r.adapter }}</span>
+    <span class="badge {% if r.status == 'failure' %}ext{% endif %}">{{ r.status }}</span>
+    <span class="vote-date">{{ r.records_upserted }} upserted</span>
+    {% if r.error %}<span class="fail" style="font-size: .8rem">{{ r.error[:90] }}</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

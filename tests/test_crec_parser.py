@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from truthtracker.ingestion.crec_parser import (
+from polititracker.ingestion.crec_parser import (
     SPEAKER_BOUNDARY,
     extract_turns,
     granule_plain_text,

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from truthtracker.search.chunking import MAX_CHARS, chunk_text
+from polititracker.search.chunking import MAX_CHARS, chunk_text
 
 FIXTURES = Path(__file__).parent / "fixtures"
 SAMPLE = (FIXTURES / "crec_house_sample.txt").read_text(encoding="utf-8")
