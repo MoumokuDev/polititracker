@@ -162,12 +162,14 @@ Legal: FEC individual-contributor data must never be used for solicitation or
 commercial purposes (52 U.S.C. 30111(a)(4)). Phase 1 stores committee-level
 summaries only.
 
-## Security note for public deployments
+## Security note for shared deployments
 
-The promise/accountability editor endpoints have **no authentication yet**.
-They are gated by `ENABLE_EDITING` — set it to `false` in `.env` before
-exposing an instance to the internet, or keep the instance on a private
-network. Editor authentication is on the roadmap.
+The editing surface (promises, accountability records) supports single-editor
+password auth: set `EDITOR_PASSWORD` (and ideally `SECRET_KEY`) in `.env` and
+editing requires login at `/login`. With no password set, editing is open —
+acceptable only for local development. `ENABLE_EDITING=false` turns the
+editing surface off entirely. Always deploy behind TLS before logging in over
+an untrusted network.
 
 ## Contributing
 

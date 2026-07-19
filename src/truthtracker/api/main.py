@@ -110,8 +110,11 @@ _STATIC_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 from truthtracker.api.accountability import router as accountability_router  # noqa: E402
+from truthtracker.api.auth import is_editor  # noqa: E402
+from truthtracker.api.auth import router as auth_router  # noqa: E402
 from truthtracker.api.promises import router as promises_router  # noqa: E402
 
+app.include_router(auth_router)
 app.include_router(promises_router)
 app.include_router(accountability_router)
 
@@ -423,7 +426,7 @@ async def figure_page(
             "disclosure_total": disclosure_total,
             "filing_type_labels": FILING_TYPE_LABELS,
             "figure_topics": figure_topics,
-            "editing": get_settings().enable_editing,
+            "editing": is_editor(request),
             "coverage": coverage,
             "labels": SOURCE_TYPE_LABELS,
             "timeline_badges": TIMELINE_STATEMENT_BADGES,

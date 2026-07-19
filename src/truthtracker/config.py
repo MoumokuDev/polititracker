@@ -16,9 +16,13 @@ class Settings(BaseSettings):
     search_match_threshold: float = 0.55
     # minimum similarity for a machine-assigned statement topic tag
     topic_tag_threshold: float = 0.60
-    # promise/evidence editing forms — DISABLE before any public deployment
-    # (the editor endpoints have no authentication yet)
+    # master switch for the editing surface (promises, accountability records)
     enable_editing: bool = True
+    # when set, editing requires login at /login with this password; when empty,
+    # editing is open (local development mode) — set it on any shared instance
+    editor_password: str = ""
+    # cookie-signing key; falls back to editor_password if unset
+    secret_key: str = ""
     # shown as the author of editorial assessments
     editor_name: str = "instance editor"
 

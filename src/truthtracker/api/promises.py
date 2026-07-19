@@ -1,7 +1,7 @@
 """Promise tracking routes: records + attributed editorial assessment.
 
-Editing endpoints are gated by settings.enable_editing and currently have no
-authentication — disable editing before exposing an instance publicly.
+Editing endpoints are gated by the editor session (see api/auth.py): the
+enable_editing master switch plus, when editor_password is set, a login.
 """
 
 from datetime import UTC, date, datetime
@@ -14,6 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from truthtracker.api.auth import is_editor, require_editor
 from truthtracker.config import get_settings
 from truthtracker.db import get_async_session
 from truthtracker.models import (
@@ -28,11 +29,6 @@ router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
 EVIDENCE_KINDS = ("statement", "vote", "bill", "external")
-
-
-def _require_editing() -> None:
-    if not get_settings().enable_editing:
-        raise HTTPException(status_code=403, detail="editing is disabled on this instance")
 
 
 def _valid_url(url: str) -> str:
@@ -67,7 +63,7 @@ async def promise_new_form(
     statement_id: int | None = None,
     session: AsyncSession = Depends(get_async_session),
 ):
-    _require_editing()
+    require_editor(request)
     figure = await _get_figure(session, slug)
     prefill = {"quote": "", "source_url": "", "made_on": "", "statement_id": ""}
     if statement_id is not None:
@@ -87,6 +83,7 @@ async def promise_new_form(
 @router.post("/figures/{slug}/promises", include_in_schema=False)
 async def promise_create(
     slug: str,
+    request: Request,
     title: str = Form(...),
     quote: str = Form(...),
     source_url: str = Form(...),
@@ -94,7 +91,7 @@ async def promise_create(
     statement_id: str = Form(""),
     session: AsyncSession = Depends(get_async_session),
 ):
-    _require_editing()
+    require_editor(request)
     figure = await _get_figure(session, slug)
     title, quote = title.strip(), quote.strip()
     if not title or not quote:
@@ -142,7 +139,7 @@ async def promise_detail(
             "figure": figure,
             "status_labels": PROMISE_STATUS_LABELS,
             "evidence_kinds": EVIDENCE_KINDS,
-            "editing": get_settings().enable_editing,
+            "editing": is_editor(request),
             "editor_name": get_settings().editor_name,
         },
     )
@@ -151,12 +148,13 @@ async def promise_detail(
 @router.post("/promises/{promise_id}/evidence", include_in_schema=False)
 async def evidence_add(
     promise_id: int,
+    request: Request,
     kind: str = Form(...),
     note: str = Form(...),
     source_url: str = Form(...),
     session: AsyncSession = Depends(get_async_session),
 ):
-    _require_editing()
+    require_editor(request)
     promise = await _get_promise(session, promise_id)
     if kind not in EVIDENCE_KINDS:
         raise HTTPException(status_code=400, detail=f"kind must be one of {EVIDENCE_KINDS}")
@@ -177,12 +175,13 @@ async def evidence_add(
 @router.post("/promises/{promise_id}/status", include_in_schema=False)
 async def status_set(
     promise_id: int,
+    request: Request,
     status: str = Form(...),
     assessment: str = Form(""),
     assessed_by: str = Form(""),
     session: AsyncSession = Depends(get_async_session),
 ):
-    _require_editing()
+    require_editor(request)
     promise = await _get_promise(session, promise_id)
     if status not in PROMISE_STATUS_LABELS:
         raise HTTPException(status_code=400, detail="unknown status")
@@ -210,9 +209,11 @@ async def status_set(
 
 @router.post("/promises/{promise_id}/delete", include_in_schema=False)
 async def promise_delete(
-    promise_id: int, session: AsyncSession = Depends(get_async_session)
+    promise_id: int,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
 ):
-    _require_editing()
+    require_editor(request)
     promise = await _get_promise(session, promise_id)
     figure = await session.get(Figure, promise.figure_id)
     for row in promise.evidence:

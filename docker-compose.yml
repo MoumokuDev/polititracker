@@ -28,6 +28,9 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
+    volumes:
+      - tt_hfcache:/root/.cache/huggingface
+      - tt_portraits:/app/src/truthtracker/api/static/portraits
 
   worker:
     build: .
@@ -39,6 +42,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - tt_hfcache:/root/.cache/huggingface
+      - tt_portraits:/app/src/truthtracker/api/static/portraits
 
 volumes:
   tt_pgdata:
+  tt_hfcache:
+  tt_portraits:

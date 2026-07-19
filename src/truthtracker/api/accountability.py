@@ -1,7 +1,7 @@
 """Accountability record routes: append-only documented events, editor-curated.
 
-Same editing gate as promises (settings.enable_editing; no auth yet — disable
-before public deployment).
+Same editing gate as promises (see api/auth.py): enable_editing master switch
+plus editor login when editor_password is set.
 """
 
 from datetime import date
@@ -13,17 +13,12 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from truthtracker.config import get_settings
+from truthtracker.api.auth import require_editor
 from truthtracker.db import get_async_session
 from truthtracker.models import RECORD_TYPE_LABELS, AccountabilityRecord, Figure
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
-
-
-def _require_editing() -> None:
-    if not get_settings().enable_editing:
-        raise HTTPException(status_code=403, detail="editing is disabled on this instance")
 
 
 async def _get_figure(session: AsyncSession, slug: str) -> Figure:
@@ -37,7 +32,7 @@ async def _get_figure(session: AsyncSession, slug: str) -> Figure:
 async def record_new_form(
     slug: str, request: Request, session: AsyncSession = Depends(get_async_session)
 ):
-    _require_editing()
+    require_editor(request)
     figure = await _get_figure(session, slug)
     return templates.TemplateResponse(
         request,
@@ -49,6 +44,7 @@ async def record_new_form(
 @router.post("/figures/{slug}/accountability", include_in_schema=False)
 async def record_create(
     slug: str,
+    request: Request,
     record_type: str = Form(...),
     title: str = Form(...),
     description: str = Form(...),
@@ -58,7 +54,7 @@ async def record_create(
     status_note: str = Form(""),
     session: AsyncSession = Depends(get_async_session),
 ):
-    _require_editing()
+    require_editor(request)
     figure = await _get_figure(session, slug)
     if record_type not in RECORD_TYPE_LABELS:
         raise HTTPException(status_code=400, detail="unknown record type")
@@ -85,9 +81,11 @@ async def record_create(
 
 @router.post("/accountability/{record_id}/delete", include_in_schema=False)
 async def record_delete(
-    record_id: int, session: AsyncSession = Depends(get_async_session)
+    record_id: int,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
 ):
-    _require_editing()
+    require_editor(request)
     record = await session.get(AccountabilityRecord, record_id)
     if record is None:
         raise HTTPException(status_code=404, detail="no such record")
