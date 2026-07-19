@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     secret_key: str = ""
     # shown as the author of editorial assessments
     editor_name: str = "instance editor"
+    # where downloaded portraits live; empty = inside the package's static dir
+    # (set to a mounted volume path in containers so portraits persist)
+    portraits_dir: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

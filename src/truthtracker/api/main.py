@@ -105,6 +105,13 @@ app = FastAPI(
     ),
 )
 
+from truthtracker.ingestion.adapters.portraits import portraits_dir  # noqa: E402
+
+_PORTRAITS_DIR = portraits_dir()
+_PORTRAITS_DIR.mkdir(parents=True, exist_ok=True)
+app.mount(
+    "/static/portraits", StaticFiles(directory=str(_PORTRAITS_DIR)), name="portraits"
+)
 _STATIC_DIR = Path(__file__).parent / "static"
 _STATIC_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")

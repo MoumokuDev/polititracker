@@ -27,13 +27,21 @@ log = logging.getLogger(__name__)
 
 ADAPTER = "portraits"
 SOURCE_URL = "https://unitedstates.github.io/images/congress/450x550/{bioguide}.jpg"
-PORTRAITS_DIR = Path(__file__).resolve().parents[2] / "api" / "static" / "portraits"
+_DEFAULT_DIR = Path(__file__).resolve().parents[2] / "api" / "static" / "portraits"
+
+
+def portraits_dir() -> Path:
+    from truthtracker.config import get_settings
+
+    configured = get_settings().portraits_dir
+    return Path(configured) if configured else _DEFAULT_DIR
 
 
 def run(session: Session) -> dict:
     client = plain_client()
-    PORTRAITS_DIR.mkdir(parents=True, exist_ok=True)
-    manifest_path = PORTRAITS_DIR / "manifest.json"
+    target_dir = portraits_dir()
+    target_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = target_dir / "manifest.json"
     manifest: dict = (
         json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
     )
@@ -46,7 +54,7 @@ def run(session: Session) -> dict:
 
         fetched = 0
         for bioguide in bioguides:
-            target = PORTRAITS_DIR / f"{bioguide}.jpg"
+            target = target_dir / f"{bioguide}.jpg"
             if target.exists() and manifest.get(bioguide, {}).get("status") == "ok":
                 continue
             url = SOURCE_URL.format(bioguide=bioguide)
@@ -86,6 +94,7 @@ def run(session: Session) -> dict:
 
 def available_portraits() -> set[str]:
     """Bioguide ids that have a locally stored portrait."""
-    if not PORTRAITS_DIR.exists():
+    directory = portraits_dir()
+    if not directory.exists():
         return set()
-    return {p.stem for p in PORTRAITS_DIR.glob("*.jpg")}
+    return {p.stem for p in directory.glob("*.jpg")}
