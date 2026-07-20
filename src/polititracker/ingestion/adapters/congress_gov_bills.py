@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from polititracker.ingestion.base import ingestion_run, record_fetch
 from polititracker.ingestion.http import data_gov_client
-from polititracker.models import Bill
+from polititracker.models import Bill, SourceFetch
 
 log = logging.getLogger(__name__)
 
@@ -30,9 +30,31 @@ def _clean_summary(text: str) -> str:
     return html_lib.unescape(text).strip()
 
 
+def _apply_sponsor(bill: Bill, data: dict) -> None:
+    sponsors = data.get("sponsors") or []
+    if sponsors:
+        bill.sponsor_bioguide = sponsors[0].get("bioguideId")
+        bill.sponsor_party = sponsors[0].get("party")
+
+
 def run(session: Session, limit: int = 100) -> dict:
     client = data_gov_client()  # Congress.gov budget: 5,000/hr
     with ingestion_run(session, ADAPTER) as run_row:
+        # zero-cost pass: extract sponsor fields from already-stored detail payloads
+        stored = session.execute(
+            select(Bill, SourceFetch.payload)
+            .join(SourceFetch, SourceFetch.id == Bill.source_fetch_id)
+            .where(
+                Bill.sponsor_party.is_(None),
+                Bill.summary_checked_at.is_not(None),
+                SourceFetch.adapter == ADAPTER,
+            )
+        ).all()
+        for bill, payload in stored:
+            _apply_sponsor(bill, payload)
+        if stored:
+            session.commit()
+
         bills = (
             session.scalars(
                 select(Bill)
@@ -56,6 +78,7 @@ def run(session: Session, limit: int = 100) -> dict:
             )
             bill.title = data.get("title")
             bill.policy_area = (data.get("policyArea") or {}).get("name")
+            _apply_sponsor(bill, data)
             latest = data.get("latestAction") or {}
             if latest.get("actionDate"):
                 bill.latest_action_date = date.fromisoformat(latest["actionDate"])

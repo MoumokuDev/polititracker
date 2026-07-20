@@ -446,11 +446,14 @@ async def figure_page(
             )
         )
     ).scalar_one()
-    party_unity = await session.scalar(
-        select(FigureStat).where(
-            FigureStat.figure_id == figure.id, FigureStat.key == "party_unity"
+    stat_rows = (
+        await session.scalars(
+            select(FigureStat).where(FigureStat.figure_id == figure.id)
         )
-    )
+    ).all()
+    figure_stats = {s.key: s for s in stat_rows}
+    party_unity = figure_stats.get("party_unity")
+    bipartisan = figure_stats.get("bipartisan_cosponsorship")
 
     return templates.TemplateResponse(
         request,
@@ -482,6 +485,7 @@ async def figure_page(
             },
             "committees": committees,
             "party_unity": party_unity,
+            "bipartisan": bipartisan,
             "timeline": timeline,
             "finance": finance,
             "finance_sources": finance_sources,

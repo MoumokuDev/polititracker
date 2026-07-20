@@ -76,14 +76,21 @@
   {% if party_unity %}
   <div class="tile"><div class="n">{{ party_unity.value }}%</div><div class="l">Voted with own party on divided votes</div></div>
   {% endif %}
+  {% if bipartisan %}
+  <div class="tile"><div class="n">{{ bipartisan.value }}%</div><div class="l">Cosponsorships crossing party lines</div></div>
+  {% endif %}
 </div>
-{% if party_unity %}
+{% if party_unity or bipartisan %}
 <p class="roles-list" style="margin-top: -.6rem">
-  Party unity: on the {{ party_unity.denominator }} recorded roll calls where
-  majorities of the two parties took opposite positions, voted with their own
-  party's majority {{ party_unity.numerator }} times
-  ({{ party_unity.value }}%). Yea/Nay votes only; absences excluded. Computed
-  from the full-chamber results stored with each roll call.</p>
+  {% if party_unity %}Party unity: on the {{ party_unity.denominator }} recorded roll
+  calls where majorities of the two parties took opposite positions, voted with
+  their own party's majority {{ party_unity.numerator }} times
+  ({{ party_unity.value }}%). Yea/Nay votes only; absences excluded. Computed from
+  the full-chamber results stored with each roll call.{% endif %}
+  {% if bipartisan %} Bipartisan cosponsorship: of the {{ bipartisan.denominator }}
+  cosponsored bills whose lead sponsor's party is ingested so far,
+  {{ bipartisan.numerator }} ({{ bipartisan.value }}%) were led by a member of the
+  other major party. This denominator grows as bill enrichment progresses.{% endif %}</p>
 {% endif %}
 
 {% if committees %}

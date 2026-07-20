@@ -62,9 +62,10 @@ def topics_daily() -> None:
 
 
 def stats_daily() -> None:
-    from polititracker.analytics import party_unity
+    from polititracker.analytics import bipartisanship, party_unity
 
     _job(party_unity.run)
+    _job(bipartisanship.run)
 
 
 def portraits_weekly() -> None:

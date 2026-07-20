@@ -140,9 +140,9 @@ def main(argv: list[str] | None = None) -> int:
 
         return _run(committees.run)
     if args.command == "compute-stats":
-        from polititracker.analytics import party_unity
+        from polititracker.analytics import bipartisanship, party_unity
 
-        return _run(party_unity.run)
+        return _run(lambda s: [party_unity.run(s), bipartisanship.run(s)])
     if args.command == "ingest-sponsorship":
         from polititracker.ingestion.adapters import member_sponsorship
 

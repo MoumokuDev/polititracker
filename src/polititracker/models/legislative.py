@@ -34,6 +34,9 @@ class Bill(Base, TimestampMixin):
     number: Mapped[int] = mapped_column(Integer)
     title: Mapped[str | None] = mapped_column(Text)
     policy_area: Mapped[str | None] = mapped_column(String(128))  # Congress.gov taxonomy
+    # lead sponsor, from the Congress.gov bill detail (party as reported: R/D/I...)
+    sponsor_bioguide: Mapped[str | None] = mapped_column(String(16))
+    sponsor_party: Mapped[str | None] = mapped_column(String(4))
     latest_action_date: Mapped[date | None] = mapped_column(Date)
     latest_action_text: Mapped[str | None] = mapped_column(Text)
     # Official CRS summary (Congressional Research Service, via Congress.gov) —
